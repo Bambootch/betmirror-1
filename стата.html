@@ -1,0 +1,2807 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BetMirror Pro — АПЛ 2026-2027</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #0b0e14;
+            color: #e8edf5;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0 20px;
+            border-bottom: 1px solid #1f2a36;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f5b042, #f7d875);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .badge {
+            background: #1f2a36;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            color: #9aaec2;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            background: #f5b042;
+            color: #0b0e14;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .header-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 20px rgba(245, 176, 66, 0.3);
+        }
+
+        .header-btn.secondary {
+            background: #1f2a36;
+            color: #b0c4d8;
+        }
+
+        .header-btn.secondary:hover {
+            background: #2a3a4a;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #9aaec2;
+            font-size: 13px;
+        }
+
+        .user-info .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f5b042;
+            color: #0b0e14;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* ===== ВКЛАДКИ ===== */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin: 20px 0 18px;
+            background: #141c26;
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid #1f2a36;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            color: #7f93a8;
+            font-weight: 600;
+            font-size: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            min-width: 80px;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            background: #f5b042;
+            color: #0b0e14;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #1f2a36;
+        }
+
+        .tab-btn .tab-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #f56b6b;
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+            opacity: 0;
+            transform: scale(0);
+            transition: 0.3s;
+        }
+
+        .tab-btn .tab-badge.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== МОДАЛКА ЛОГИНА ===== */
+        .login-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-overlay.open {
+            display: flex;
+        }
+
+        .login-box {
+            background: #141c26;
+            border-radius: 24px;
+            padding: 40px 36px;
+            max-width: 420px;
+            width: 92%;
+            border: 1px solid #2a3a4a;
+        }
+
+        .login-box h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #f5b042;
+        }
+
+        .login-box .sub {
+            color: #7f93a8;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .login-box label {
+            font-size: 13px;
+            color: #9aaec2;
+            display: block;
+            margin: 12px 0 4px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0f161f;
+            border: 1px solid #1f2a36;
+            border-radius: 12px;
+            color: #e8edf5;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .login-box input:focus {
+            border-color: #f5b042;
+        }
+
+        .login-box .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+
+        .login-box .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #f5b042;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .login-box .remember-me label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            color: #9aaec2;
+        }
+
+        .login-box .login-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .login-box .login-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .login-box .login-actions .btn-login {
+            background: #f5b042;
+            color: #0b0e14;
+        }
+
+        .login-box .login-actions .btn-login:hover {
+            transform: scale(1.02);
+        }
+
+        .login-box .login-actions .btn-register {
+            background: #1f2a36;
+            color: #b0c4d8;
+        }
+
+        .login-box .login-actions .btn-register:hover {
+            background: #2a3a4a;
+        }
+
+        .login-box .error {
+            color: #f56b6b;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .login-box .error.show {
+            display: block;
+        }
+
+        /* ===== БАНК ===== */
+        .bank-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 0 0 18px;
+        }
+
+        .bank-card {
+            background: #141c26;
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            border: 1px solid #1f2a36;
+        }
+
+        .bank-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #7f93a8;
+            letter-spacing: 0.4px;
+        }
+
+        .bank-value {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .bank-value.green {
+            color: #4cd9a8;
+        }
+        .bank-value.red {
+            color: #f56b6b;
+        }
+        .bank-value.gold {
+            color: #f5b042;
+        }
+
+        /* ===== КОМАНДЫ ===== */
+        .teams-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .teams-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .team-card {
+            background: #141c26;
+            border: 2px solid #1f2a36;
+            border-radius: 12px;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .team-card:hover {
+            border-color: #f5b042;
+            transform: translateY(-2px);
+        }
+
+        .team-card.selected-home {
+            border-color: #4cd9a8;
+            background: #1a2a22;
+            box-shadow: 0 0 20px rgba(76, 217, 168, 0.15);
+        }
+
+        .team-card.selected-away {
+            border-color: #f56b6b;
+            background: #2a1a1a;
+            box-shadow: 0 0 20px rgba(245, 107, 107, 0.15);
+        }
+
+        .team-card.derby {
+            border-color: #ff0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.3);
+            animation: derbyPulse 2s infinite;
+        }
+
+        @keyframes derbyPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(255, 0, 0, 0.5);
+            }
+        }
+
+        .team-card .team-flag {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .team-card .team-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .team-card .team-stats {
+            font-size: 10px;
+            color: #7f93a8;
+            margin-top: 4px;
+        }
+
+        .team-card .team-label {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: #4cd9a8;
+            color: #0b0e14;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+        }
+
+        .team-card .team-label.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .team-card .team-label.away-label {
+            background: #f56b6b;
+        }
+
+        .team-card .derby-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ff0000;
+            color: white;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 8px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+        }
+
+        .team-card .derby-badge.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .team-card .travel-info {
+            font-size: 9px;
+            color: #7f93a8;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .team-card .travel-info .icon {
+            font-size: 12px;
+        }
+
+        /* ===== ТАБЛИЦА ===== */
+        .league-table {
+            background: #141c26;
+            border-radius: 16px;
+            border: 1px solid #1f2a36;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .league-table .table-header {
+            display: grid;
+            grid-template-columns: 30px 1fr 30px 30px 30px 30px 40px 50px 40px;
+            padding: 10px 12px;
+            background: #0f161f;
+            color: #7f93a8;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid #1f2a36;
+        }
+
+        .league-table .table-row {
+            display: grid;
+            grid-template-columns: 30px 1fr 30px 30px 30px 30px 40px 50px 40px;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #1a2330;
+            align-items: center;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .league-table .table-row:hover {
+            background: #1a2330;
+        }
+
+        .league-table .table-row:last-child {
+            border: none;
+        }
+
+        .league-table .table-row.derby-row {
+            border-left: 3px solid #ff0000;
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .league-table .pos {
+            font-weight: 700;
+            color: #7f93a8;
+        }
+
+        .league-table .pos.top-4 {
+            color: #4cd9a8;
+        }
+        .league-table .pos.europe {
+            color: #f5b042;
+        }
+        .league-table .pos.relegation {
+            color: #f56b6b;
+        }
+
+        .league-table .team-name {
+            font-weight: 500;
+        }
+
+        .league-table .pts {
+            font-weight: 700;
+            color: #f5b042;
+        }
+
+        /* ===== ПАНЕЛЬ СТАВКИ ===== */
+        .bet-panel {
+            background: #141c26;
+            border: 1px solid #1f2a36;
+            border-radius: 16px;
+            padding: 18px;
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .bet-panel h3 {
+            font-size: 17px;
+            margin-bottom: 14px;
+            color: #f5b042;
+        }
+
+        .bet-panel .selected-teams {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 8px;
+            align-items: center;
+            background: #0f161f;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .bet-panel .selected-teams .team {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .bet-panel .selected-teams .vs {
+            color: #7f93a8;
+            font-size: 12px;
+        }
+
+        .bet-panel .selected-teams .empty {
+            color: #5f7388;
+            font-size: 12px;
+        }
+
+        .bet-panel .derby-warning {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            border-radius: 8px;
+            padding: 6px 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #ff4444;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .bet-panel .derby-warning.show {
+            display: block;
+        }
+
+        .bet-panel .travel-distance {
+            background: #0f161f;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #9aaec2;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bet-panel .travel-distance.show {
+            display: flex;
+        }
+
+        .bet-panel .travel-distance .icon {
+            font-size: 16px;
+        }
+
+        .bet-panel label {
+            font-size: 11px;
+            color: #9aaec2;
+            display: block;
+            margin: 10px 0 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .bet-panel select,
+        .bet-panel input {
+            width: 100%;
+            padding: 8px 12px;
+            background: #0f161f;
+            border: 1px solid #1f2a36;
+            border-radius: 10px;
+            color: #e8edf5;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .bet-panel select:focus,
+        .bet-panel input:focus {
+            border-color: #f5b042;
+        }
+
+        .bet-panel .bet-type-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 4px;
+            margin: 4px 0 8px;
+        }
+
+        .bet-panel .bet-type-tab {
+            padding: 6px 4px;
+            background: #1f2a36;
+            border: none;
+            border-radius: 8px;
+            color: #9aaec2;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .bet-panel .bet-type-tab.active {
+            background: #f5b042;
+            color: #0b0e14;
+        }
+
+        .bet-panel .bet-type-tab:hover:not(.active) {
+            background: #2a3a4a;
+        }
+
+        .bet-panel .quick-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+            margin: 4px 0;
+        }
+
+        .bet-panel .quick-btn {
+            background: #1f2a36;
+            border: none;
+            color: #b0c4d8;
+            padding: 5px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .bet-panel .quick-btn:hover {
+            background: #2a3a4a;
+        }
+
+        .bet-panel .quick-btn.active {
+            background: #f5b042;
+            color: #0b0e14;
+        }
+
+        .bet-panel .add-bet-btn {
+            width: 100%;
+            padding: 12px;
+            background: #f5b042;
+            color: #0b0e14;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 14px;
+            transition: 0.2s;
+        }
+
+        .bet-panel .add-bet-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .bet-panel .add-bet-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* ===== СТАТИСТИКА ===== */
+        .split-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 20px 0 18px;
+        }
+
+        .split-card {
+            background: #141c26;
+            border-radius: 16px;
+            padding: 18px 16px 16px;
+            border: 1px solid #1f2a36;
+        }
+
+        .split-title {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .split-title .type {
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: #1f2a36;
+        }
+
+        .split-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #1a2330;
+        }
+
+        .split-row:last-child {
+            border: none;
+        }
+
+        .split-row .label {
+            color: #9aaec2;
+        }
+        .split-row .value {
+            font-weight: 600;
+        }
+
+        .profit-green {
+            color: #4cd9a8;
+        }
+        .profit-red {
+            color: #f56b6b;
+        }
+
+        /* ===== ИСТОРИЯ СТАВОК ===== */
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 24px 0 12px;
+        }
+
+        .history-header .section-title {
+            margin: 0;
+        }
+
+        .history-header .add-bet-btn-header {
+            background: #f5b042;
+            color: #0b0e14;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-header .add-bet-btn-header:hover {
+            transform: scale(1.04);
+            box-shadow: 0 4px 20px rgba(245, 176, 66, 0.3);
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 0 0 12px;
+        }
+
+        .filter-btn {
+            background: #1f2a36;
+            border: none;
+            color: #b0c4d8;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #f5b042;
+            color: #0b0e14;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover {
+            opacity: 0.8;
+        }
+
+        /* ===== СТАВКИ ===== */
+        .bet-item {
+            background: #141c26;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid #2a3a4a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .bet-item:hover {
+            background: #1a2330;
+        }
+
+        .bet-item.win {
+            border-left-color: #4cd9a8;
+        }
+        .bet-item.loss {
+            border-left-color: #f56b6b;
+        }
+        .bet-item.has-note {
+            border-left-color: #f5b042;
+        }
+        .bet-item.returned {
+            border-left-color: #4fc3f7;
+        }
+        .bet-item.bought {
+            border-left-color: #ff8a65;
+        }
+
+        .bet-item .bet-left {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .bet-left .bet-date {
+            font-size: 12px;
+            color: #7f93a8;
+        }
+        .bet-left .bet-desc {
+            font-size: 15px;
+            font-weight: 500;
+            margin: 4px 0 2px;
+        }
+        .bet-left .bet-detail {
+            font-size: 13px;
+            color: #b0c4d8;
+        }
+
+        .bet-left .bet-note-tag {
+            display: inline-block;
+            background: #f5b042;
+            color: #0b0e14;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+
+        .bet-left .bet-status-tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+            margin-left: 4px;
+        }
+
+        .bet-left .bet-status-tag.return {
+            background: #4fc3f7;
+            color: #0b0e14;
+        }
+
+        .bet-left .bet-status-tag.buyout {
+            background: #ff8a65;
+            color: #0b0e14;
+        }
+
+        .bet-right {
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .bet-right .bet-coef {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .bet-right .bet-result {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .bet-right .bet-result.win {
+            color: #4cd9a8;
+        }
+        .bet-right .bet-result.loss {
+            color: #f56b6b;
+        }
+        .bet-right .bet-result.return {
+            color: #4fc3f7;
+        }
+        .bet-right .bet-result.buyout {
+            color: #ff8a65;
+        }
+
+        .bet-actions {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .bet-actions button {
+            background: none;
+            border: none;
+            color: #5f7388;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: 0.2s;
+            font-size: 13px;
+        }
+
+        .bet-actions button:hover {
+            background: #1f2a36;
+            color: #f5b042;
+        }
+
+        .bet-actions .note-btn.active {
+            color: #f5b042;
+        }
+
+        .bet-actions .delete-btn:hover {
+            color: #f56b6b;
+        }
+
+        .bet-actions .return-btn {
+            color: #4fc3f7;
+        }
+
+        .bet-actions .return-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+            color: #4fc3f7;
+        }
+
+        .bet-actions .buyout-btn {
+            color: #ff8a65;
+        }
+
+        .bet-actions .buyout-btn:hover {
+            background: rgba(255, 138, 101, 0.2);
+            color: #ff8a65;
+        }
+
+        .bet-actions .return-btn.active {
+            background: rgba(79, 195, 247, 0.2);
+        }
+
+        .bet-actions .buyout-btn.active {
+            background: rgba(255, 138, 101, 0.2);
+        }
+
+        /* ===== МОДАЛКА ВОЗВРАТА/ВЫКУПА ===== */
+        .action-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .action-modal.open {
+            display: flex;
+        }
+
+        .action-modal-box {
+            background: #141c26;
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 420px;
+            width: 92%;
+            border: 1px solid #2a3a4a;
+        }
+
+        .action-modal-box h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .action-modal-box .sub {
+            color: #7f93a8;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .action-modal-box label {
+            font-size: 13px;
+            color: #9aaec2;
+            display: block;
+            margin: 12px 0 4px;
+        }
+
+        .action-modal-box input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0f161f;
+            border: 1px solid #1f2a36;
+            border-radius: 10px;
+            color: #e8edf5;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .action-modal-box input:focus {
+            border-color: #f5b042;
+        }
+
+        .action-modal-box .action-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .action-modal-box .action-actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .action-modal-box .action-actions .btn-confirm {
+            background: #f5b042;
+            color: #0b0e14;
+        }
+
+        .action-modal-box .action-actions .btn-confirm:hover {
+            transform: scale(1.02);
+        }
+
+        .action-modal-box .action-actions .btn-cancel {
+            background: #1f2a36;
+            color: #b0c4d8;
+        }
+
+        .action-modal-box .action-actions .btn-cancel:hover {
+            background: #2a3a4a;
+        }
+
+        .action-modal-box .action-actions .btn-confirm.return {
+            background: #4fc3f7;
+            color: #0b0e14;
+        }
+
+        .action-modal-box .action-actions .btn-confirm.buyout {
+            background: #ff8a65;
+            color: #0b0e14;
+        }
+
+        /* ===== МОДАЛКА НОТИСА ===== */
+        .note-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .note-modal.open {
+            display: flex;
+        }
+
+        .note-modal-box {
+            background: #141c26;
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 500px;
+            width: 92%;
+            border: 1px solid #2a3a4a;
+        }
+
+        .note-modal-box h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #f5b042;
+        }
+
+        .note-modal-box .sub {
+            color: #7f93a8;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .note-modal-box textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px 16px;
+            background: #0f161f;
+            border: 1px solid #1f2a36;
+            border-radius: 12px;
+            color: #e8edf5;
+            font-size: 14px;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .note-modal-box textarea:focus {
+            border-color: #f5b042;
+        }
+
+        .note-modal-box .note-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .note-modal-box .note-actions button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .note-modal-box .note-actions .btn-save-note {
+            background: #f5b042;
+            color: #0b0e14;
+        }
+
+        .note-modal-box .note-actions .btn-save-note:hover {
+            transform: scale(1.02);
+        }
+
+        .note-modal-box .note-actions .btn-cancel-note {
+            background: #1f2a36;
+            color: #b0c4d8;
+        }
+
+        .note-modal-box .note-actions .btn-cancel-note:hover {
+            background: #2a3a4a;
+        }
+
+        .note-modal-box .note-actions .btn-delete-note {
+            background: #f56b6b;
+            color: #0b0e14;
+        }
+
+        .note-modal-box .note-actions .btn-delete-note:hover {
+            background: #ff4444;
+        }
+
+        /* ===== ВКЛАДКА ЗАМЕТКИ ===== */
+        .note-item {
+            background: #141c26;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #f5b042;
+        }
+
+        .note-item .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .note-item .note-header .note-event {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .note-item .note-header .note-date {
+            font-size: 12px;
+            color: #7f93a8;
+        }
+
+        .note-item .note-text {
+            color: #b0c4d8;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+        }
+
+        .note-item .note-meta {
+            font-size: 12px;
+            color: #7f93a8;
+        }
+
+        .note-item .note-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .note-item .note-actions button {
+            background: #1f2a36;
+            border: none;
+            color: #b0c4d8;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .note-item .note-actions button:hover {
+            background: #2a3a4a;
+        }
+
+        .note-item .note-actions .delete-note-btn:hover {
+            background: #f56b6b;
+            color: #0b0e14;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #5f7388;
+        }
+
+        /* ===== МОДАЛКА ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #141c26;
+            border-radius: 24px;
+            padding: 28px 24px;
+            max-width: 460px;
+            width: 92%;
+            border: 1px solid #2a3a4a;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-box h3 {
+            font-size: 22px;
+            margin-bottom: 18px;
+        }
+
+        .modal-box label {
+            font-size: 13px;
+            color: #9aaec2;
+            display: block;
+            margin: 12px 0 4px;
+        }
+
+        .modal-box input,
+        .modal-box select {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0f161f;
+            border: 1px solid #1f2a36;
+            border-radius: 10px;
+            color: #e8edf5;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .modal-box input:focus,
+        .modal-box select:focus {
+            border-color: #f5b042;
+        }
+
+        .modal-box .return-amount-field {
+            display: none;
+            margin-top: 6px;
+        }
+
+        .modal-box .return-amount-field.show {
+            display: block;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .btn-save {
+            background: #f5b042;
+            color: #0b0e14;
+        }
+
+        .btn-cancel {
+            background: #1f2a36;
+            color: #b0c4d8;
+        }
+
+        @media (max-width: 640px) {
+            .bank-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .split-grid {
+                grid-template-columns: 1fr;
+            }
+            .bet-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .bet-right {
+                text-align: left;
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .teams-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            }
+            .teams-layout {
+                grid-template-columns: 1fr;
+            }
+            .bet-panel {
+                position: static;
+                max-height: none;
+            }
+            .league-table .table-header,
+            .league-table .table-row {
+                grid-template-columns: 25px 1fr 25px 25px 25px 25px 30px 40px 30px;
+                font-size: 11px;
+                padding: 6px 8px;
+            }
+            .bet-panel .bet-type-tabs {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .header-left {
+                justify-content: center;
+            }
+            .header-actions {
+                justify-content: center;
+            }
+            .login-box {
+                padding: 24px 20px;
+            }
+            .history-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .history-header .add-bet-btn-header {
+                justify-content: center;
+            }
+            .bet-actions {
+                margin-top: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== ЛОГИН ===== -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>🔐 BetMirror</h2>
+            <div class="sub">Войдите или создайте аккаунт</div>
+            <label>👤 Логин</label>
+            <input id="loginUsername" placeholder="Введите логин" />
+            <label>🔑 Пароль</label>
+            <input id="loginPassword" type="password" placeholder="Введите пароль" />
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" />
+                <label for="rememberMe">Запомнить меня</label>
+            </div>
+            <div class="error" id="loginError">Неверный логин или пароль</div>
+            <div class="login-actions">
+                <button class="btn-login" onclick="handleLogin()">Войти</button>
+                <button class="btn-register" onclick="handleRegister()">Регистрация</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="app">
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="header-left">
+                <span class="logo">⬡ BetMirror Pro</span>
+                <span class="badge" id="totalBets">0 ставок</span>
+            </div>
+            <div class="header-actions">
+                <span class="user-info" id="userInfo">
+                    <span class="avatar" id="userAvatar">👤</span>
+                    <span id="userName">Гость</span>
+                </span>
+                <button class="header-btn secondary" id="logoutBtn" onclick="handleLogout()" style="display:none;">🚪 Выйти</button>
+            </div>
+        </div>
+
+        <!-- ===== ВКЛАДКИ ===== -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="stats">📊 Статистика</button>
+            <button class="tab-btn" data-tab="teams">🏆 АПЛ 2026-27</button>
+            <button class="tab-btn" data-tab="notes">📝 Заметки <span class="tab-badge" id="notesBadge">0</span></button>
+        </div>
+
+        <!-- ===== СТАТИСТИКА ===== -->
+        <div class="tab-content active" id="tab-stats">
+            <div class="bank-grid">
+                <div class="bank-card"><div class="bank-label">Баланс</div><div class="bank-value gold" id="balance">0 ₽</div></div>
+                <div class="bank-card"><div class="bank-label">Поставлено</div><div class="bank-value" id="totalStaked">0 ₽</div></div>
+                <div class="bank-card"><div class="bank-label">Чистая прибыль</div><div class="bank-value" id="netProfit">0 ₽</div></div>
+                <div class="bank-card"><div class="bank-label">ROI</div><div class="bank-value" id="roi">0%</div></div>
+            </div>
+
+            <div class="split-grid">
+                <div class="split-card">
+                    <div class="split-title"><span>🎯 Ординары</span><span class="type">одинар</span></div>
+                    <div class="split-row"><span class="label">Всего</span><span class="value" id="singleCount">0</span></div>
+                    <div class="split-row"><span class="label">Выигрыши</span><span class="value" id="singleWins">0</span></div>
+                    <div class="split-row"><span class="label">Проходимость</span><span class="value" id="singleRate">0%</span></div>
+                    <div class="split-row"><span class="label">Прибыль</span><span class="value" id="singleProfit">0 ₽</span></div>
+                </div>
+                <div class="split-card">
+                    <div class="split-title"><span>⚡ Экспрессы</span><span class="type">экспресс</span></div>
+                    <div class="split-row"><span class="label">Всего</span><span class="value" id="multiCount">0</span></div>
+                    <div class="split-row"><span class="label">Выигрыши</span><span class="value" id="multiWins">0</span></div>
+                    <div class="split-row"><span class="label">Проходимость</span><span class="value" id="multiRate">0%</span></div>
+                    <div class="split-row"><span class="label">Прибыль</span><span class="value" id="multiProfit">0 ₽</span></div>
+                </div>
+            </div>
+
+            <!-- ===== ИСТОРИЯ СТАВОК ===== -->
+            <div class="history-header">
+                <div class="section-title">📋 История ставок</div>
+                <button class="add-bet-btn-header" onclick="openModal()">➕ Добавить ставку</button>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">Все</button>
+                <button class="filter-btn" data-filter="ординар">Ординары</button>
+                <button class="filter-btn" data-filter="экспресс">Экспрессы</button>
+                <button class="filter-btn" data-filter="win">✅ Выигрыш</button>
+                <button class="filter-btn" data-filter="loss">❌ Проигрыш</button>
+                <button class="filter-btn" data-filter="return">🔄 Возврат</button>
+                <button class="filter-btn" data-filter="buyout">💰 Выкуп</button>
+                <button class="filter-btn" data-filter="hasnote">📝 С заметками</button>
+            </div>
+            <div id="betList"><div class="empty-state">➕ Добавьте первую ставку</div></div>
+        </div>
+
+        <!-- ===== АПЛ ===== -->
+        <div class="tab-content" id="tab-teams">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+                <h3 style="font-size:18px;">🏆 Английская Премьер-Лига 2026-2027</h3>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input id="teamSearch" placeholder="🔍 Поиск..." style="background:#0f161f;border:1px solid #1f2a36;border-radius:10px;padding:8px 14px;color:#e8edf5;outline:none;width:140px;" />
+                </div>
+            </div>
+
+            <div class="teams-layout">
+                <div>
+                    <div class="teams-grid" id="teamsGrid"></div>
+                    <div class="league-table">
+                        <div class="table-header">
+                            <span>#</span><span>Команда</span><span>P</span><span>W</span><span>D</span><span>L</span><span>DIFF</span><span>GLS</span><span>PTS</span>
+                        </div>
+                        <div id="tableRows"></div>
+                    </div>
+                </div>
+
+                <div class="bet-panel" id="betPanel">
+                    <h3>🎯 Быстрая ставка</h3>
+                    <div class="selected-teams" id="selectedTeamsDisplay">
+                        <div class="team" id="homeTeamDisplay"><span class="empty">🔵 Хозяева</span></div>
+                        <div class="vs">VS</div>
+                        <div class="team" id="awayTeamDisplay"><span class="empty">🔴 Гости</span></div>
+                    </div>
+
+                    <div class="derby-warning" id="derbyWarning">⚔️ ДЕРБИ! Принципиальный матч!</div>
+                    <div class="travel-distance" id="travelDistance">
+                        <span class="icon" id="travelIcon">🚌</span>
+                        <span id="travelText">Расстояние: 0 км</span>
+                    </div>
+
+                    <label>Тип ставки</label>
+                    <div class="bet-type-tabs" id="betTypeTabs">
+                        <button class="bet-type-tab active" data-type="pobeda">🏆 Победа</button>
+                        <button class="bet-type-tab" data-type="uglovye">🔄 Угловые</button>
+                        <button class="bet-type-tab" data-type="total">⚽ Тотал</button>
+                        <button class="bet-type-tab" data-type="oz">🔄 ОЗ</button>
+                    </div>
+
+                    <div id="pobedaSettings">
+                        <label>Ставка на</label>
+                        <select id="pobedaTeam">
+                            <option value="home">Хозяева (1)</option>
+                            <option value="away">Гости (2)</option>
+                            <option value="draw">Ничья (X)</option>
+                        </select>
+                        <label>Доп. условие</label>
+                        <select id="pobedaCondition">
+                            <option value="">Без условия</option>
+                            <option value="suhaya">Сухая победа</option>
+                            <option value="sforoy">С форой</option>
+                        </select>
+                        <div id="pobedaFora" style="display:none;margin-top:6px;">
+                            <input id="pobedaForaValue" type="number" step="0.5" placeholder="1.5" />
+                            <select id="pobedaForaSign" style="width:auto;display:inline-block;">
+                                <option value="-">-</option>
+                                <option value="+">+</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="uglovyeSettings" style="display:none;">
+                        <label>Период</label>
+                        <select id="uglovyePeriod">
+                            <option value="1taym">1-й тайм</option>
+                            <option value="match">Матч</option>
+                        </select>
+                        <label>Ставка на</label>
+                        <select id="uglovyeTeam">
+                            <option value="home">Хозяева</option>
+                            <option value="away">Гости</option>
+                        </select>
+                        <label>Фора</label>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <select id="uglovyeForaSign" style="width:60px;">
+                                <option value="-">-</option>
+                                <option value="+">+</option>
+                            </select>
+                            <input id="uglovyeForaValue" type="number" step="0.5" placeholder="1.5" style="flex:1;" />
+                        </div>
+                    </div>
+
+                    <div id="totalSettings" style="display:none;">
+                        <label>Период</label>
+                        <select id="totalPeriod">
+                            <option value="1taym">1-й тайм</option>
+                            <option value="match">Матч</option>
+                        </select>
+                        <label>Ставка на</label>
+                        <select id="totalTeam">
+                            <option value="home">Хозяева</option>
+                            <option value="away">Гости</option>
+                            <option value="both">Обе команды</option>
+                        </select>
+                        <label>Тотал</label>
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <select id="totalSign" style="width:60px;">
+                                <option value=">">Больше</option>
+                                <option value="<">Меньше</option>
+                            </select>
+                            <input id="totalValue" type="number" step="0.5" placeholder="2.5" style="flex:1;" />
+                        </div>
+                    </div>
+
+                    <div id="ozSettings" style="display:none;">
+                        <label>Обе забьют</label>
+                        <select id="ozValue">
+                            <option value="yes">Да</option>
+                            <option value="no">Нет</option>
+                        </select>
+                    </div>
+
+                    <label>Коэффициент</label>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <input id="betCoef" type="number" step="0.01" placeholder="2.90" style="flex:1;min-width:70px;" />
+                        <div class="quick-btns">
+                            <button class="quick-btn" data-coef="1.50">1.50</button>
+                            <button class="quick-btn" data-coef="2.00">2.00</button>
+                            <button class="quick-btn" data-coef="2.90">2.90</button>
+                            <button class="quick-btn" data-coef="3.50">3.50</button>
+                            <button class="quick-btn" data-coef="5.00">5.00</button>
+                            <button class="quick-btn" data-coef="10.00">10.00</button>
+                        </div>
+                    </div>
+
+                    <label>Сумма (₽)</label>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                        <input id="betAmount" type="number" step="100" placeholder="2000" style="flex:1;min-width:70px;" />
+                        <div class="quick-btns">
+                            <button class="quick-btn" data-amount="500">500</button>
+                            <button class="quick-btn" data-amount="1000">1k</button>
+                            <button class="quick-btn" data-amount="2000">2k</button>
+                            <button class="quick-btn" data-amount="5000">5k</button>
+                            <button class="quick-btn" data-amount="10000">10k</button>
+                        </div>
+                    </div>
+
+                    <label>Результат</label>
+                    <select id="betResult">
+                        <option value="win">✅ Выигрыш</option>
+                        <option value="loss">❌ Проигрыш</option>
+                        <option value="return">🔄 Возврат</option>
+                    </select>
+
+                    <button class="add-bet-btn" id="addTeamBetBtn" disabled>➕ Добавить ставку</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ЗАМЕТКИ ===== -->
+        <div class="tab-content" id="tab-notes">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+                <h3 style="font-size:18px;">📝 Заметки по ставкам</h3>
+                <span style="color:#7f93a8;font-size:13px;" id="notesCount">Всего: 0</span>
+            </div>
+            <div id="notesList"><div class="empty-state">📭 Нет сохраненных заметок</div></div>
+        </div>
+
+        <!-- ===== МОДАЛКА СТАВКИ ===== -->
+        <div class="modal" id="modal">
+            <div class="modal-box">
+                <h3>➕ Новая ставка</h3>
+                <label>Тип</label>
+                <select id="modalBetType">
+                    <option value="ординар">Ординар</option>
+                    <option value="экспресс">Экспресс</option>
+                </select>
+                <label>Событие</label>
+                <input id="modalEvent" placeholder="Манчестер Сити – Ливерпуль" />
+                <label>Прогноз</label>
+                <input id="modalPrediction" placeholder="Победа 1" />
+                <label>Коэффициент</label>
+                <input id="modalCoef" type="number" step="0.01" placeholder="2.90" />
+                <label>Сумма</label>
+                <input id="modalAmount" type="number" step="1" placeholder="2000" />
+                <label>Результат</label>
+                <select id="modalResult" onchange="toggleReturnAmount()">
+                    <option value="win">✅ Выигрыш</option>
+                    <option value="loss">❌ Проигрыш</option>
+                    <option value="return">🔄 Возврат</option>
+                </select>
+                <div class="return-amount-field" id="returnAmountField">
+                    <label>Сумма возврата</label>
+                    <input id="modalReturnAmount" type="number" step="1" placeholder="Введите сумму возврата" />
+                </div>
+                <label>Дата</label>
+                <input id="modalDate" placeholder="19.07" value="19.07" />
+                <div class="modal-actions">
+                    <button class="btn-cancel" onclick="closeModal()">Отмена</button>
+                    <button class="btn-save" onclick="saveModalBet()">Сохранить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== МОДАЛКА ВОЗВРАТА/ВЫКУПА ===== -->
+        <div class="action-modal" id="actionModal">
+            <div class="action-modal-box">
+                <h3 id="actionModalTitle">🔄 Возврат</h3>
+                <div class="sub" id="actionModalSub">Укажите сумму возврата</div>
+                <label>Сумма</label>
+                <input id="actionAmount" type="number" step="1" placeholder="Введите сумму" />
+                <div class="action-actions">
+                    <button class="btn-cancel" onclick="closeActionModal()">Отмена</button>
+                    <button class="btn-confirm" id="actionConfirmBtn" onclick="confirmAction()">Подтвердить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== МОДАЛКА НОТИСА ===== -->
+        <div class="note-modal" id="noteModal">
+            <div class="note-modal-box">
+                <h3>📝 Заметка по ставке</h3>
+                <div class="sub" id="noteBetInfo">Ставка: ...</div>
+                <textarea id="noteText" placeholder="Что пошло не так? Что нужно запомнить?"></textarea>
+                <div class="note-actions">
+                    <button class="btn-cancel-note" onclick="closeNoteModal()">Отмена</button>
+                    <button class="btn-delete-note" id="deleteNoteBtn" style="display:none;" onclick="deleteNote()">🗑️ Удалить</button>
+                    <button class="btn-save-note" onclick="saveNote()">💾 Сохранить</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        //  BetMirror Pro — ПОЛНАЯ ВЕРСИЯ С ВОЗВРАТОМ И ВЫКУПОМ
+        // ============================================================
+
+        // ===== ДАННЫЕ КОМАНД =====
+        const TEAMS_DATA = [
+            { id: 'arsenal', name: 'Арсенал', flag: '🔴', city: 'Лондон', lat: 51.555, lng: -0.108 },
+            { id: 'astonvilla', name: 'Астон Вилла', flag: '🟣', city: 'Бирмингем', lat: 52.509, lng: -1.884 },
+            { id: 'bournemouth', name: 'Борнмут', flag: '⚫', city: 'Борнмут', lat: 50.735, lng: -1.838 },
+            { id: 'brentford', name: 'Брентфорд', flag: '🐝', city: 'Лондон', lat: 51.488, lng: -0.302 },
+            { id: 'brighton', name: 'Брайтон', flag: '⚪', city: 'Брайтон', lat: 50.822, lng: -0.137 },
+            { id: 'chelsea', name: 'Челси', flag: '🔵', city: 'Лондон', lat: 51.482, lng: -0.191 },
+            { id: 'crystalpalace', name: 'Кристал Пэлас', flag: '🔴', city: 'Лондон', lat: 51.398, lng: -0.085 },
+            { id: 'everton', name: 'Эвертон', flag: '🔵', city: 'Ливерпуль', lat: 53.439, lng: -2.966 },
+            { id: 'fulham', name: 'Фулхэм', flag: '⚪', city: 'Лондон', lat: 51.475, lng: -0.222 },
+            { id: 'ipswich', name: 'Ипсвич Таун', flag: '🔵', city: 'Ипсвич', lat: 52.056, lng: 1.144 },
+            { id: 'leeds', name: 'Лидс', flag: '🟡', city: 'Лидс', lat: 53.778, lng: -1.572 },
+            { id: 'liverpool', name: 'Ливерпуль', flag: '🔴', city: 'Ливерпуль', lat: 53.431, lng: -2.961 },
+            { id: 'mancity', name: 'Манчестер Сити', flag: '🔵', city: 'Манчестер', lat: 53.483, lng: -2.200 },
+            { id: 'manutd', name: 'Манчестер Юнайтед', flag: '🔴', city: 'Манчестер', lat: 53.463, lng: -2.291 },
+            { id: 'newcastle', name: 'Ньюкасл Юнайтед', flag: '⚫', city: 'Ньюкасл', lat: 54.975, lng: -1.622 },
+            { id: 'nottingham', name: 'Ноттингем Форест', flag: '🔴', city: 'Ноттингем', lat: 52.940, lng: -1.133 },
+            { id: 'sunderland', name: 'АФК Сандерленд', flag: '🔴', city: 'Сандерленд', lat: 54.914, lng: -1.388 },
+            { id: 'tottenham', name: 'Тоттенхэм', flag: '⚪', city: 'Лондон', lat: 51.604, lng: -0.066 },
+            { id: 'westham', name: 'Вест Хэм', flag: '🟣', city: 'Лондон', lat: 51.532, lng: 0.039 },
+            { id: 'wolves', name: 'Вулверхэмптон', flag: '🟠', city: 'Вулверхэмптон', lat: 52.590, lng: -2.130 }
+        ];
+
+        // ===== ТАБЛИЦА =====
+        const LEAGUE_TABLE = {};
+        TEAMS_DATA.forEach(t => {
+            LEAGUE_TABLE[t.id] = { p: 0, w: 0, d: 0, l: 0, diff: 0, gls: '0:0', pts: 0 };
+        });
+        LEAGUE_TABLE['mancity'].pts = 6;
+        LEAGUE_TABLE['mancity'].p = 2;
+        LEAGUE_TABLE['mancity'].w = 2;
+        LEAGUE_TABLE['arsenal'].pts = 4;
+        LEAGUE_TABLE['arsenal'].p = 2;
+        LEAGUE_TABLE['arsenal'].w = 1;
+        LEAGUE_TABLE['arsenal'].d = 1;
+        LEAGUE_TABLE['liverpool'].pts = 3;
+        LEAGUE_TABLE['liverpool'].p = 2;
+        LEAGUE_TABLE['liverpool'].w = 1;
+        LEAGUE_TABLE['liverpool'].l = 1;
+        LEAGUE_TABLE['chelsea'].pts = 3;
+        LEAGUE_TABLE['chelsea'].p = 2;
+        LEAGUE_TABLE['chelsea'].w = 1;
+        LEAGUE_TABLE['chelsea'].l = 1;
+
+        // ===== ДЕРБИ =====
+        const DERBIES = [
+            { teams: ['arsenal', 'chelsea', 'tottenham', 'fulham', 'westham', 'brentford', 'crystalpalace'],
+                name: 'Лондонское дерби' },
+            { teams: ['arsenal', 'tottenham'], name: 'Северолондонское дерби' },
+            { teams: ['liverpool', 'everton'], name: 'Мерсисайдское дерби' },
+            { teams: ['manutd', 'mancity'], name: 'Манчестерское дерби' },
+            { teams: ['newcastle', 'sunderland'], name: 'Тайн-Уир дерби' },
+            { teams: ['leeds', 'manutd'], name: 'Война Роз' },
+            { teams: ['leeds', 'chelsea'], name: 'Принципиальное противостояние' },
+        ];
+
+        // ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ =====
+        let bets = [];
+        let notes = [];
+        let chartInstance = null;
+        let homeTeamId = null;
+        let awayTeamId = null;
+        let activeBetType = 'pobeda';
+        let currentUser = null;
+        let editingNoteIndex = null;
+        let actionBetIndex = null;
+        let actionType = null;
+
+        // ===== ФУНКЦИИ РАССТОЯНИЙ И ДЕРБИ =====
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return Math.round(R * c);
+        }
+
+        function getTravelInfo(team1Id, team2Id) {
+            const t1 = TEAMS_DATA.find(t => t.id === team1Id);
+            const t2 = TEAMS_DATA.find(t => t.id === team2Id);
+            if (!t1 || !t2) return null;
+            const dist = calculateDistance(t1.lat, t1.lng, t2.lat, t2.lng);
+            let icon = '🚌',
+                mode = 'Автобус';
+            if (dist > 200) { icon = '✈️';
+                mode = 'Самолет'; } else if (dist > 80) { icon = '🚗';
+                mode = 'Автомобиль'; }
+            return { distance: dist, icon, mode };
+        }
+
+        function isDerby(team1Id, team2Id) {
+            if (!team1Id || !team2Id) return false;
+            for (const derby of DERBIES) {
+                if (derby.teams.includes(team1Id) && derby.teams.includes(team2Id)) {
+                    return derby.name;
+                }
+            }
+            return false;
+        }
+
+        function getDerbyTeams() {
+            const derbySet = new Set();
+            DERBIES.forEach(d => d.teams.forEach(t => derbySet.add(t)));
+            return derbySet;
+        }
+
+        // ===== АККАУНТЫ =====
+        function getUsers() {
+            const data = localStorage.getItem('betmirror_users');
+            return data ? JSON.parse(data) : {};
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem('betmirror_users', JSON.stringify(users));
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const remember = document.getElementById('rememberMe').checked;
+            const users = getUsers();
+
+            if (!username || !password) {
+                showLoginError('Введите логин и пароль');
+                return;
+            }
+
+            if (users[username] && users[username] === password) {
+                currentUser = username;
+                if (remember) {
+                    localStorage.setItem('betmirror_remember', username);
+                } else {
+                    localStorage.removeItem('betmirror_remember');
+                }
+                document.getElementById('loginOverlay').classList.remove('open');
+                document.getElementById('userName').textContent = username;
+                document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+                document.getElementById('logoutBtn').style.display = 'inline-block';
+                loadUserData(username);
+                render();
+                renderAll();
+                renderNotes();
+                return;
+            }
+
+            showLoginError('Неверный логин или пароль');
+        }
+
+        function handleRegister() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const users = getUsers();
+
+            if (!username || !password) {
+                showLoginError('Введите логин и пароль');
+                return;
+            }
+
+            if (username.length < 3) {
+                showLoginError('Логин должен быть не менее 3 символов');
+                return;
+            }
+
+            if (password.length < 4) {
+                showLoginError('Пароль должен быть не менее 4 символов');
+                return;
+            }
+
+            if (users[username]) {
+                showLoginError('Пользователь уже существует');
+                return;
+            }
+
+            users[username] = password;
+            saveUsers(users);
+            document.getElementById('loginError').classList.remove('show');
+            alert('✅ Аккаунт создан! Теперь войдите.');
+        }
+
+        function handleLogout() {
+            if (confirm('Выйти из аккаунта?')) {
+                currentUser = null;
+                document.getElementById('userName').textContent = 'Гость';
+                document.getElementById('userAvatar').textContent = '👤';
+                document.getElementById('logoutBtn').style.display = 'none';
+                localStorage.removeItem('betmirror_remember');
+                bets = [];
+                notes = [];
+                render();
+                renderAll();
+                renderNotes();
+                document.getElementById('loginOverlay').classList.add('open');
+            }
+        }
+
+        function showLoginError(msg) {
+            const el = document.getElementById('loginError');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function loadUserData(username) {
+            const data = localStorage.getItem('betmirror_data_' + username);
+            if (data) {
+                try {
+                    const parsed = JSON.parse(data);
+                    bets = parsed.bets || [];
+                    notes = parsed.notes || [];
+                } catch (e) {
+                    bets = [];
+                    notes = [];
+                }
+            } else {
+                bets = [
+                    { type: 'ординар', event: 'Манчестер Сити – Ливерпуль', prediction: 'Победа 1 (Сухая)',
+                        coef: 2.10, amount: 2000, result: 'win', date: '19.07' },
+                    { type: 'ординар', event: 'Арсенал – Челси', prediction: 'Тотал > 2.5 (матч)',
+                        coef: 1.85, amount: 1500, result: 'win', date: '19.07' },
+                    { type: 'экспресс', event: 'Ливерпуль – Манчестер Юнайтед', prediction: 'Угловые Фора -1.5 (1 тайм)',
+                        coef: 3.80, amount: 1000, result: 'loss', date: '18.07' },
+                    { type: 'ординар', event: 'Ньюкасл – Сандерленд', prediction: 'Победа 1',
+                        coef: 1.95, amount: 3000, result: 'win', date: '17.07' }
+                ];
+                notes = [];
+                saveUserData();
+            }
+        }
+
+        function saveUserData() {
+            if (currentUser) {
+                localStorage.setItem('betmirror_data_' + currentUser, JSON.stringify({ bets, notes }));
+            }
+        }
+
+        // ===== ФУНКЦИЯ ПОКАЗА/СКРЫТИЯ ПОЛЯ СУММЫ ВОЗВРАТА =====
+        function toggleReturnAmount() {
+            const result = document.getElementById('modalResult').value;
+            const field = document.getElementById('returnAmountField');
+            if (result === 'return') {
+                field.classList.add('show');
+            } else {
+                field.classList.remove('show');
+            }
+        }
+
+        // ===== ВОЗВРАТ И ВЫКУП =====
+        function openActionModal(index, type) {
+            actionBetIndex = index;
+            actionType = type;
+            const bet = bets[index];
+            if (!bet) return;
+
+            const title = type === 'return' ? '🔄 Возврат' : '💰 Выкуп';
+            const sub = type === 'return' ?
+                `Укажите сумму возврата для ставки: ${bet.event}` :
+                `Укажите сумму выкупа для ставки: ${bet.event}`;
+
+            document.getElementById('actionModalTitle').textContent = title;
+            document.getElementById('actionModalSub').textContent = sub;
+            document.getElementById('actionAmount').value = bet.amount || '';
+            document.getElementById('actionAmount').placeholder = `Сумма ${type === 'return' ? 'возврата' : 'выкупа'}`;
+
+            const confirmBtn = document.getElementById('actionConfirmBtn');
+            confirmBtn.className = 'btn-confirm ' + (type === 'return' ? 'return' : 'buyout');
+            confirmBtn.textContent = type === 'return' ? '🔄 Подтвердить возврат' : '💰 Подтвердить выкуп';
+
+            document.getElementById('actionModal').classList.add('open');
+        }
+
+        function closeActionModal() {
+            document.getElementById('actionModal').classList.remove('open');
+            actionBetIndex = null;
+            actionType = null;
+        }
+
+        function confirmAction() {
+            if (actionBetIndex === null || !actionType) return;
+            const amount = parseInt(document.getElementById('actionAmount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert('Введите корректную сумму');
+                return;
+            }
+
+            const bet = bets[actionBetIndex];
+            if (!bet) return;
+
+            if (actionType === 'return') {
+                bet.isReturned = true;
+                bet.returnAmount = amount;
+                bet.result = 'return';
+                bet.returnDate = new Date().toLocaleString('ru-RU');
+                delete bet.isBought;
+                delete bet.buyoutAmount;
+            } else {
+                bet.isBought = true;
+                bet.buyoutAmount = amount;
+                bet.result = 'buyout';
+                bet.buyoutDate = new Date().toLocaleString('ru-RU');
+                delete bet.isReturned;
+                delete bet.returnAmount;
+            }
+
+            saveUserData();
+            closeActionModal();
+            render();
+            renderNotes();
+            alert(`✅ ${actionType === 'return' ? 'Возврат' : 'Выкуп'} подтвержден на сумму ${amount} ₽`);
+        }
+
+        // ===== НОТИСЫ =====
+        function openNoteModal(betIndex) {
+            editingNoteIndex = betIndex;
+            const bet = bets[betIndex];
+            if (!bet) return;
+
+            document.getElementById('noteBetInfo').textContent =
+                `📌 ${bet.event} — ${bet.prediction} (${bet.date})`;
+            document.getElementById('noteText').value = bet.note || '';
+
+            const deleteBtn = document.getElementById('deleteNoteBtn');
+            if (bet.note) {
+                deleteBtn.style.display = 'inline-block';
+            } else {
+                deleteBtn.style.display = 'none';
+            }
+
+            document.getElementById('noteModal').classList.add('open');
+        }
+
+        function closeNoteModal() {
+            document.getElementById('noteModal').classList.remove('open');
+            editingNoteIndex = null;
+        }
+
+        function saveNote() {
+            if (editingNoteIndex === null) return;
+            const text = document.getElementById('noteText').value.trim();
+            if (!text) {
+                alert('Введите текст заметки');
+                return;
+            }
+
+            const bet = bets[editingNoteIndex];
+            if (!bet) return;
+
+            bet.note = text;
+            bet.noteDate = new Date().toLocaleString('ru-RU');
+            saveUserData();
+            closeNoteModal();
+            render();
+            renderNotes();
+        }
+
+        function deleteNote() {
+            if (editingNoteIndex === null) return;
+            if (!confirm('Удалить заметку?')) return;
+
+            const bet = bets[editingNoteIndex];
+            if (bet) {
+                delete bet.note;
+                delete bet.noteDate;
+                saveUserData();
+            }
+            closeNoteModal();
+            render();
+            renderNotes();
+        }
+
+        function renderNotes() {
+            const container = document.getElementById('notesList');
+            const notesWithBet = bets.filter(b => b.note);
+
+            document.getElementById('notesCount').textContent = `Всего: ${notesWithBet.length}`;
+            document.getElementById('notesBadge').textContent = notesWithBet.length;
+            document.getElementById('notesBadge').classList.toggle('show', notesWithBet.length > 0);
+
+            if (notesWithBet.length === 0) {
+                container.innerHTML = '<div class="empty-state">📭 Нет сохраненных заметок</div>';
+                return;
+            }
+
+            container.innerHTML = notesWithBet.map((bet, idx) => {
+                const globalIdx = bets.indexOf(bet);
+                return `
+                        <div class="note-item">
+                            <div class="note-header">
+                                <span class="note-event">${bet.event}</span>
+                                <span class="note-date">📅 ${bet.noteDate || bet.date}</span>
+                            </div>
+                            <div class="note-text">${bet.note}</div>
+                            <div class="note-meta">${bet.prediction} • Кф ${bet.coef} • ${bet.result === 'win' ? '✅ Выигрыш' : bet.result === 'return' ? '🔄 Возврат' : bet.result === 'buyout' ? '💰 Выкуп' : '❌ Проигрыш'}</div>
+                            <div class="note-actions">
+                                <button onclick="editNote(${globalIdx})">✏️ Редактировать</button>
+                                <button class="delete-note-btn" onclick="deleteNoteFromList(${globalIdx})">🗑️ Удалить</button>
+                            </div>
+                        </div>
+                    `;
+            }).join('');
+        }
+
+        function editNote(index) {
+            openNoteModal(index);
+        }
+
+        function deleteNoteFromList(index) {
+            if (!confirm('Удалить заметку?')) return;
+            const bet = bets[index];
+            if (bet) {
+                delete bet.note;
+                delete bet.noteDate;
+                saveUserData();
+                render();
+                renderNotes();
+            }
+        }
+
+        // ===== ВЫБОР КОМАНД =====
+        function toggleTeam(teamId) {
+            if (homeTeamId === teamId) {
+                homeTeamId = null;
+                renderAll();
+                return;
+            }
+            if (awayTeamId === teamId) {
+                awayTeamId = null;
+                renderAll();
+                return;
+            }
+            if (homeTeamId === null) {
+                homeTeamId = teamId;
+                renderAll();
+                return;
+            }
+            if (homeTeamId !== null && awayTeamId === null && teamId !== homeTeamId) {
+                awayTeamId = teamId;
+                renderAll();
+                return;
+            }
+            if (homeTeamId !== null && awayTeamId !== null && teamId !== homeTeamId && teamId !== awayTeamId) {
+                awayTeamId = teamId;
+                renderAll();
+                return;
+            }
+            renderAll();
+        }
+
+        // ===== РЕНДЕР =====
+        function renderAll() {
+            renderTeams();
+            renderLeagueTable();
+            updateBetPanel();
+        }
+
+        function renderTeams() {
+            const grid = document.getElementById('teamsGrid');
+            const search = document.getElementById('teamSearch').value.toLowerCase();
+
+            let filtered = TEAMS_DATA;
+            if (search) filtered = filtered.filter(t => t.name.toLowerCase().includes(search));
+
+            const derbyTeams = getDerbyTeams();
+            const teamStats = {};
+            bets.forEach(b => {
+                TEAMS_DATA.forEach(team => {
+                    if (b.event.includes(team.name)) {
+                        if (!teamStats[team.id]) teamStats[team.id] = { bets: 0, wins: 0, profit: 0 };
+                        teamStats[team.id].bets++;
+                        if (b.result === 'win') {
+                            teamStats[team.id].wins++;
+                            teamStats[team.id].profit += (b.amount * b.coef - b.amount);
+                        } else if (b.result === 'return' || b.result === 'buyout') {
+                            // не влияет на прибыль
+                        } else {
+                            teamStats[team.id].profit -= b.amount;
+                        }
+                    }
+                });
+            });
+
+            grid.innerHTML = filtered.map(team => {
+                const isHome = homeTeamId === team.id;
+                const isAway = awayTeamId === team.id;
+                const isDerbyTeam = derbyTeams.has(team.id);
+                let cls = '';
+                if (isHome) cls = 'selected-home';
+                if (isAway) cls = 'selected-away';
+                if (isDerbyTeam) cls += ' derby';
+
+                const stats = teamStats[team.id] || { bets: 0, wins: 0, profit: 0 };
+
+                let travelHtml = '';
+                if (isAway && homeTeamId) {
+                    const info = getTravelInfo(team.id, homeTeamId);
+                    if (info) {
+                        travelHtml = `
+                                <div class="travel-info">
+                                    <span class="icon">${info.icon}</span>
+                                    ${info.distance} км
+                                </div>
+                            `;
+                    }
+                }
+
+                return `
+                        <div class="team-card ${cls}" onclick="toggleTeam('${team.id}')">
+                            <span class="team-flag">${team.flag}</span>
+                            <div class="team-name">${team.name}</div>
+                            <div class="team-stats">${stats.bets} ст. • ${stats.profit >= 0 ? '+' : ''}${stats.profit.toFixed(0)}₽</div>
+                            ${travelHtml}
+                            <div class="team-label ${isHome ? 'show' : ''}">🏠</div>
+                            <div class="team-label away-label ${isAway ? 'show' : ''}">✈️</div>
+                            <div class="derby-badge ${isDerbyTeam ? 'show' : ''}">⚔️</div>
+                        </div>
+                    `;
+            }).join('');
+        }
+
+        function renderLeagueTable() {
+            const tbody = document.getElementById('tableRows');
+            const sorted = TEAMS_DATA.map(t => ({ ...t, ...LEAGUE_TABLE[t.id] }))
+                .sort((a, b) => b.pts - a.pts || a.id.localeCompare(b.id));
+
+            const derbyTeams = getDerbyTeams();
+
+            tbody.innerHTML = sorted.map((team, index) => {
+                const pos = index + 1;
+                let posClass = '';
+                if (pos <= 4) posClass = 'top-4';
+                else if (pos <= 7) posClass = 'europe';
+                else if (pos >= 18) posClass = 'relegation';
+                const isHome = homeTeamId === team.id;
+                const isAway = awayTeamId === team.id;
+                const isDerbyTeam = derbyTeams.has(team.id);
+                let style = '';
+                if (isHome) style = 'border-left:3px solid #4cd9a8;background:#1a2a22;';
+                if (isAway) style = 'border-left:3px solid #f56b6b;background:#2a1a1a;';
+                if (isDerbyTeam && !isHome && !isAway) style = 'border-left:3px solid #ff0000;background:rgba(255,0,0,0.05);';
+                return `
+                        <div class="table-row ${isDerbyTeam ? 'derby-row' : ''}" style="${style}" onclick="toggleTeam('${team.id}')">
+                            <span class="pos ${posClass}">${pos}</span>
+                            <span class="team-name">${team.flag} ${team.name}</span>
+                            <span>${team.p}</span><span>${team.w}</span><span>${team.d}</span><span>${team.l}</span>
+                            <span>${team.diff}</span><span>${team.gls}</span><span class="pts">${team.pts}</span>
+                        </div>
+                    `;
+            }).join('');
+        }
+
+        // ===== ОБНОВЛЕНИЕ ПАНЕЛИ СТАВКИ =====
+        function updateBetPanel() {
+            const homeTeam = TEAMS_DATA.find(t => t.id === homeTeamId);
+            const awayTeam = TEAMS_DATA.find(t => t.id === awayTeamId);
+
+            document.getElementById('homeTeamDisplay').innerHTML = homeTeam ?
+                `${homeTeam.flag} ${homeTeam.name}` :
+                '<span class="empty">🔵 Хозяева</span>';
+            document.getElementById('awayTeamDisplay').innerHTML = awayTeam ?
+                `${awayTeam.flag} ${awayTeam.name}` :
+                '<span class="empty">🔴 Гости</span>';
+
+            const derbyName = isDerby(homeTeamId, awayTeamId);
+            const derbyWarning = document.getElementById('derbyWarning');
+            if (derbyName) {
+                derbyWarning.textContent = `⚔️ ${derbyName}! Принципиальный матч!`;
+                derbyWarning.classList.add('show');
+            } else {
+                derbyWarning.classList.remove('show');
+            }
+
+            const travelDiv = document.getElementById('travelDistance');
+            if (homeTeamId && awayTeamId) {
+                const info = getTravelInfo(awayTeamId, homeTeamId);
+                if (info) {
+                    document.getElementById('travelIcon').textContent = info.icon;
+                    document.getElementById('travelText').textContent =
+                        `Гостям: ${info.distance} км (${info.mode})`;
+                    travelDiv.classList.add('show');
+                }
+            } else {
+                travelDiv.classList.remove('show');
+            }
+
+            const btn = document.getElementById('addTeamBetBtn');
+            btn.disabled = !(homeTeam && awayTeam);
+
+            const teamSelects = ['pobedaTeam', 'uglovyeTeam', 'totalTeam'];
+            teamSelects.forEach(id => {
+                const sel = document.getElementById(id);
+                if (sel) {
+                    const val = sel.value;
+                    sel.innerHTML = '';
+                    if (homeTeam) sel.innerHTML += `<option value="home">${homeTeam.flag} Хозяева (1)</option>`;
+                    if (awayTeam) sel.innerHTML += `<option value="away">${awayTeam.flag} Гости (2)</option>`;
+                    if (id === 'totalTeam') {
+                        sel.innerHTML += `<option value="both">Обе команды</option>`;
+                    }
+                    if (id === 'pobedaTeam') {
+                        sel.innerHTML += `<option value="draw">Ничья (X)</option>`;
+                    }
+                    if (val && [...sel.options].some(o => o.value === val)) sel.value = val;
+                }
+            });
+        }
+
+        // ===== ПЕРЕКЛЮЧЕНИЕ ТИПОВ СТАВОК =====
+        function switchBetType(type) {
+            activeBetType = type;
+            document.querySelectorAll('.bet-type-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.type === type);
+            });
+            document.getElementById('pobedaSettings').style.display = type === 'pobeda' ? 'block' : 'none';
+            document.getElementById('uglovyeSettings').style.display = type === 'uglovye' ? 'block' : 'none';
+            document.getElementById('totalSettings').style.display = type === 'total' ? 'block' : 'none';
+            document.getElementById('ozSettings').style.display = type === 'oz' ? 'block' : 'none';
+        }
+
+        document.querySelectorAll('.bet-type-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                switchBetType(this.dataset.type);
+            });
+        });
+
+        document.getElementById('pobedaCondition').addEventListener('change', function() {
+            document.getElementById('pobedaFora').style.display = this.value === 'sforoy' ? 'flex' : 'none';
+        });
+
+        // ===== ДОБАВЛЕНИЕ СТАВКИ (из панели) =====
+        function addTeamBet() {
+            const homeTeam = TEAMS_DATA.find(t => t.id === homeTeamId);
+            const awayTeam = TEAMS_DATA.find(t => t.id === awayTeamId);
+            if (!homeTeam || !awayTeam) return;
+
+            const coef = parseFloat(document.getElementById('betCoef').value);
+            const amount = parseFloat(document.getElementById('betAmount').value);
+            const result = document.getElementById('betResult').value;
+
+            if (isNaN(coef) || isNaN(amount) || amount <= 0 || coef < 1) {
+                alert('Введите корректные коэффициент и сумму');
+                return;
+            }
+
+            let prediction = '';
+            const eventName = `${homeTeam.name} – ${awayTeam.name}`;
+
+            switch (activeBetType) {
+                case 'pobeda': {
+                    const team = document.getElementById('pobedaTeam').value;
+                    const condition = document.getElementById('pobedaCondition').value;
+                    let teamLabel = '';
+                    if (team === 'home') teamLabel = homeTeam.name;
+                    else if (team === 'away') teamLabel = awayTeam.name;
+                    else teamLabel = 'Ничья';
+                    prediction = `Победа ${teamLabel}`;
+                    if (condition === 'suhaya') prediction += ' (Сухая)';
+                    if (condition === 'sforoy') {
+                        const val = document.getElementById('pobedaForaValue').value || '1.5';
+                        const sign = document.getElementById('pobedaForaSign').value;
+                        prediction += ` (Фора ${sign}${val})`;
+                    }
+                    break;
+                }
+                case 'uglovye': {
+                    const period = document.getElementById('uglovyePeriod').value;
+                    const team = document.getElementById('uglovyeTeam').value;
+                    const sign = document.getElementById('uglovyeForaSign').value;
+                    const val = document.getElementById('uglovyeForaValue').value || '1.5';
+                    const teamLabel = team === 'home' ? homeTeam.name : awayTeam.name;
+                    const periodLabel = period === '1taym' ? '1-й тайм' : 'матч';
+                    prediction = `Угловые ${teamLabel} Фора ${sign}${val} (${periodLabel})`;
+                    break;
+                }
+                case 'total': {
+                    const period = document.getElementById('totalPeriod').value;
+                    const team = document.getElementById('totalTeam').value;
+                    const sign = document.getElementById('totalSign').value;
+                    const val = document.getElementById('totalValue').value || '2.5';
+                    const teamLabel = team === 'home' ? homeTeam.name : team === 'away' ? awayTeam.name : 'Обе команды';
+                    const periodLabel = period === '1taym' ? '1-й тайм' : 'матч';
+                    prediction = `Тотал ${sign}${val} (${teamLabel}, ${periodLabel})`;
+                    break;
+                }
+                case 'oz': {
+                    const val = document.getElementById('ozValue').value;
+                    prediction = `Обе забьют: ${val === 'yes' ? 'Да' : 'Нет'}`;
+                    break;
+                }
+                default:
+                    prediction = 'Ставка';
+            }
+
+            bets.push({
+                type: 'ординар',
+                event: eventName,
+                prediction: prediction,
+                coef: coef,
+                amount: amount,
+                result: result,
+                date: new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })
+            });
+
+            saveUserData();
+            render();
+            renderAll();
+
+            document.getElementById('betCoef').value = '';
+            document.getElementById('betAmount').value = '';
+
+            alert('✅ Ставка добавлена!');
+        }
+
+        // ===== ОСНОВНОЙ РЕНДЕР =====
+        function render() {
+            const total = bets.length;
+            const totalStaked = bets.reduce((s, b) => s + b.amount, 0);
+            const totalWon = bets.filter(b => b.result === 'win').reduce((s, b) => s + (b.amount * b.coef), 0);
+            const totalReturned = bets.filter(b => b.result === 'return').reduce((s, b) => s + (b.returnAmount || 0), 0);
+            const totalBought = bets.filter(b => b.result === 'buyout').reduce((s, b) => s + (b.buyoutAmount || 0), 0);
+            const totalLost = bets.filter(b => b.result === 'loss').reduce((s, b) => s + b.amount, 0);
+            const netProfit = totalWon + totalReturned + totalBought - totalStaked;
+            const roi = totalStaked > 0 ? (netProfit / totalStaked * 100) : 0;
+
+            document.getElementById('totalBets').textContent = total + ' ставок';
+            const balance = totalWon + totalReturned + totalBought - totalLost;
+            document.getElementById('balance').textContent = balance.toFixed(0) + ' ₽';
+            document.getElementById('totalStaked').textContent = totalStaked.toFixed(0) + ' ₽';
+            const profitEl = document.getElementById('netProfit');
+            profitEl.textContent = (netProfit >= 0 ? '+' : '') + netProfit.toFixed(0) + ' ₽';
+            profitEl.className = 'bank-value ' + (netProfit >= 0 ? 'green' : 'red');
+            document.getElementById('roi').textContent = (roi >= 0 ? '+' : '') + roi.toFixed(1) + '%';
+
+            const singles = bets.filter(b => b.type === 'ординар');
+            const multis = bets.filter(b => b.type === 'экспресс');
+
+            function calcStats(arr) {
+                const count = arr.length;
+                const wins = arr.filter(b => b.result === 'win').length;
+                const rate = count > 0 ? (wins / count * 100) : 0;
+                const staked = arr.reduce((s, b) => s + b.amount, 0);
+                const won = arr.filter(b => b.result === 'win').reduce((s, b) => s + (b.amount * b.coef), 0);
+                const returned = arr.filter(b => b.result === 'return').reduce((s, b) => s + (b.returnAmount || 0), 0);
+                const bought = arr.filter(b => b.result === 'buyout').reduce((s, b) => s + (b.buyoutAmount || 0), 0);
+                const profit = won + returned + bought - staked;
+                return { count, wins, rate, profit };
+            }
+
+            const s = calcStats(singles);
+            const m = calcStats(multis);
+
+            document.getElementById('singleCount').textContent = s.count;
+            document.getElementById('singleWins').textContent = s.wins;
+            document.getElementById('singleRate').textContent = s.rate.toFixed(1) + '%';
+            const sp = document.getElementById('singleProfit');
+            sp.textContent = (s.profit >= 0 ? '+' : '') + s.profit.toFixed(0) + ' ₽';
+            sp.className = 'value ' + (s.profit >= 0 ? 'profit-green' : 'profit-red');
+
+            document.getElementById('multiCount').textContent = m.count;
+            document.getElementById('multiWins').textContent = m.wins;
+            document.getElementById('multiRate').textContent = m.rate.toFixed(1) + '%';
+            const mp = document.getElementById('multiProfit');
+            mp.textContent = (m.profit >= 0 ? '+' : '') + m.profit.toFixed(0) + ' ₽';
+            mp.className = 'value ' + (m.profit >= 0 ? 'profit-green' : 'profit-red');
+
+            const filter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+            let filtered = bets;
+            if (filter === 'ординар') filtered = filtered.filter(b => b.type === 'ординар');
+            else if (filter === 'экспресс') filtered = filtered.filter(b => b.type === 'экспресс');
+            else if (filter === 'win') filtered = filtered.filter(b => b.result === 'win');
+            else if (filter === 'loss') filtered = filtered.filter(b => b.result === 'loss');
+            else if (filter === 'return') filtered = filtered.filter(b => b.result === 'return');
+            else if (filter === 'buyout') filtered = filtered.filter(b => b.result === 'buyout');
+            else if (filter === 'hasnote') filtered = filtered.filter(b => b.note);
+
+            const betList = document.getElementById('betList');
+            if (filtered.length === 0) {
+                betList.innerHTML = '<div class="empty-state">😐 Нет ставок по этому фильтру</div>';
+            } else {
+                betList.innerHTML = filtered.map((b, idx) => {
+                    const globalIndex = bets.indexOf(b);
+                    const hasNote = b.note ? true : false;
+                    const isReturned = b.result === 'return';
+                    const isBought = b.result === 'buyout';
+                    let cls = b.result === 'win' ? 'win' : b.result === 'return' ? 'returned' : b.result === 'buyout' ?
+                        'bought' : 'loss';
+                    if (hasNote) cls += ' has-note';
+
+                    let resultText = '';
+                    if (b.result === 'win') resultText = `✅ +${(b.amount * b.coef - b.amount).toFixed(0)}`;
+                    else if (b.result === 'return') resultText = `🔄 +${(b.returnAmount || 0).toFixed(0)} (возврат)`;
+                    else if (b.result === 'buyout') resultText = `💰 +${(b.buyoutAmount || 0).toFixed(0)} (выкуп)`;
+                    else resultText = `❌ -${b.amount}`;
+
+                    let statusTag = '';
+                    if (isReturned) statusTag = '<span class="bet-status-tag return">🔄 Возврат</span>';
+                    if (isBought) statusTag = '<span class="bet-status-tag buyout">💰 Выкуп</span>';
+
+                    return `
+                            <div class="bet-item ${cls}">
+                                <div class="bet-left">
+                                    <div class="bet-date">${b.date} · ${b.type}</div>
+                                    <div class="bet-desc">${b.event}</div>
+                                    <div class="bet-detail">${b.prediction} · Кф ${b.coef}</div>
+                                    ${hasNote ? '<div class="bet-note-tag">📝 NB!</div>' : ''}
+                                    ${statusTag}
+                                </div>
+                                <div class="bet-right">
+                                    <div class="bet-result ${b.result === 'win' ? 'win' : b.result === 'return' ? 'return' : b.result === 'buyout' ? 'buyout' : 'loss'}">
+                                        ${resultText}
+                                    </div>
+                                    <div class="bet-actions">
+                                        ${!isReturned && !isBought ? `
+                                            <button class="return-btn" onclick="openActionModal(${globalIndex}, 'return')" title="Возврат">🔄</button>
+                                            <button class="buyout-btn" onclick="openActionModal(${globalIndex}, 'buyout')" title="Выкуп">💰</button>
+                                        ` : ''}
+                                        <button class="note-btn ${hasNote ? 'active' : ''}" onclick="openNoteModal(${globalIndex})" title="Заметка">📝</button>
+                                        <button class="delete-btn" onclick="deleteBet(${globalIndex})" title="Удалить">✕</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                }).reverse().join('');
+            }
+
+            renderNotes();
+        }
+
+        function deleteBet(index) {
+            if (confirm('Удалить эту ставку?')) {
+                bets.splice(index, 1);
+                saveUserData();
+                render();
+                renderAll();
+                renderNotes();
+            }
+        }
+
+        // ===== ВКЛАДКИ =====
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+
+                if (this.dataset.tab === 'teams') renderAll();
+                if (this.dataset.tab === 'notes') renderNotes();
+            });
+        });
+
+        // ===== ФИЛЬТРЫ =====
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                render();
+            });
+        });
+
+        document.getElementById('teamSearch').addEventListener('input', renderTeams);
+
+        // ===== БЫСТРЫЕ КНОПКИ =====
+        document.querySelectorAll('.quick-btn[data-coef]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('betCoef').value = this.dataset.coef;
+                document.querySelectorAll('.quick-btn[data-coef]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('.quick-btn[data-amount]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.getElementById('betAmount').value = this.dataset.amount;
+                document.querySelectorAll('.quick-btn[data-amount]').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.getElementById('addTeamBetBtn').addEventListener('click', addTeamBet);
+
+        // ===== МОДАЛКА СТАВКИ =====
+        function openModal() {
+            document.getElementById('modal').classList.add('open');
+            toggleReturnAmount();
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('open');
+            document.getElementById('modalEvent').value = '';
+            document.getElementById('modalPrediction').value = '';
+            document.getElementById('modalCoef').value = '';
+            document.getElementById('modalAmount').value = '';
+            document.getElementById('modalReturnAmount').value = '';
+            document.getElementById('returnAmountField').classList.remove('show');
+        }
+
+        function saveModalBet() {
+            const type = document.getElementById('modalBetType').value;
+            const event = document.getElementById('modalEvent').value.trim();
+            const prediction = document.getElementById('modalPrediction').value.trim();
+            const coef = parseFloat(document.getElementById('modalCoef').value);
+            const amount = parseFloat(document.getElementById('modalAmount').value);
+            let result = document.getElementById('modalResult').value;
+            const date = document.getElementById('modalDate').value.trim() || new Date().toLocaleDateString('ru-RU', { day: '2-digit',
+                month: '2-digit' });
+
+            if (!event || !prediction || isNaN(coef) || isNaN(amount) || amount <= 0 || coef < 1) {
+                alert('Заполните все поля корректно.');
+                return;
+            }
+
+            let returnAmount = null;
+            if (result === 'return') {
+                returnAmount = parseFloat(document.getElementById('modalReturnAmount').value);
+                if (isNaN(returnAmount) || returnAmount <= 0) {
+                    alert('Введите корректную сумму возврата');
+                    return;
+                }
+            }
+
+            const bet = {
+                type: type,
+                event: event,
+                prediction: prediction,
+                coef: coef,
+                amount: amount,
+                result: result,
+                date: date
+            };
+
+            if (result === 'return') {
+                bet.returnAmount = returnAmount;
+            }
+
+            bets.push(bet);
+            saveUserData();
+            render();
+            renderAll();
+            closeModal();
+        }
+
+        // ===== ЗАКРЫТИЕ МОДАЛОК ПО КЛИКУ СНАРУЖИ =====
+        document.getElementById('modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.getElementById('noteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeNoteModal();
+        });
+
+        document.getElementById('actionModal').addEventListener('click', function(e) {
+            if (e.target === this) closeActionModal();
+        });
+
+        // ===== ЗАКРЫТИЕ ПО ESC =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeNoteModal();
+                closeActionModal();
+            }
+        });
+
+        // ===== НАВИГАЦИЯ ПО ВКЛАДКАМ ЧЕРЕЗ СТРЕЛКИ =====
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                e.preventDefault();
+                const tabs = document.querySelectorAll('.tab-btn');
+                const active = document.querySelector('.tab-btn.active');
+                let idx = Array.from(tabs).indexOf(active);
+                if (e.key === 'ArrowRight') idx = (idx + 1) % tabs.length;
+                else idx = (idx - 1 + tabs.length) % tabs.length;
+                tabs[idx].click();
+            }
+        });
+
+        // ===== АВТОМАТИЧЕСКИЙ ВХОД =====
+        function autoLogin() {
+            const remembered = localStorage.getItem('betmirror_remember');
+            if (remembered) {
+                document.getElementById('loginUsername').value = remembered;
+                document.getElementById('rememberMe').checked = true;
+                const users = getUsers();
+                if (users[remembered]) {
+                    document.getElementById('loginPassword').value = users[remembered];
+                    handleLogin();
+                }
+            }
+        }
+
+        // ===== СТАРТ =====
+        document.getElementById('loginOverlay').classList.add('open');
+        autoLogin();
+
+        console.log('🔐 Для входа используйте:\nЛогин: admin\nПароль: 1234');
+        console.log('📝 Или создайте новый аккаунт через "Регистрация"');
+        console.log('✅ Включена галочка "Запомнить меня" для авто-входа');
+        console.log('🔄 В модалке добавления ставки появилась опция "Возврат" с полем для суммы');
+    </script>
+
+</body>
+</html>
